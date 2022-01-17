@@ -74,10 +74,9 @@ class ETLAlchemyTarget():
                     self.logger.info(
                             "Creating database '{0}'"
                             .format(self.conn_string.split("/")[-1]))
-                    create_database(self.dst_engine.url)
                 else:
                     self.logger.info("Database DNE...no need to nuke it.")
-                    create_database(self.dst_engine.url)
+                create_database(self.dst_engine.url)
         for source in self.sources:
             self.logger.info(
                     "Sending source '" + str(source) + "' to destination '" +

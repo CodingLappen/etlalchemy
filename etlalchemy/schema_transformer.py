@@ -40,14 +40,10 @@ class SchemaTransformer():
         if not self.column_transformations.get(st.old_table):
             # No column transformations exist for the table
             self.column_transformations[st.old_table] = {}
-            self.column_transformations[st.old_table][st.old_column] = st
         elif self.column_transformations[st.old_table].get(st.old_column):
             # There ALREADY EXISTS a transformation on this column, UPDATE IT
             self.column_transformations[st.old_table][st.old_column].delete = True
-            self.column_transformations[st.old_table][st.old_column] = st
-        else:
-            # Transformations exist on the table, not nothing on the column
-            self.column_transformations[st.old_table][st.old_column] = st
+        self.column_transformations[st.old_table][st.old_column] = st
 
     def __init__(self, column_transform_file,
                  table_transform_file, global_renamed_col_suffixes={}):

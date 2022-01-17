@@ -9,14 +9,13 @@ except:
 
 def _generate_literal_value_for_csv(value, dialect):
     dialect_name = dialect.name.lower()
-    
+
     if isinstance(value, basestring):
         if dialect_name in ['sqlite', 'mssql']:
             # No support for 'quote' enclosed strings
             return "%s" % value
-        else:
-            value = value.replace('"', '""')
-            return "\"%s\"" % value
+        value = value.replace('"', '""')
+        return "\"%s\"" % value
     elif value is None:
         return "NULL"
     elif isinstance(value, bool):
@@ -72,7 +71,7 @@ def _generate_literal_value_for_csv(value, dialect):
             raise NotImplementedError(
                     "No support for engine with dialect '%s'." +
                     "Implement it here!" % dialect.name)
-    
+
     else:
         raise NotImplementedError(
                     "Don't know how to literal-quote value %r" % value)
@@ -141,13 +140,11 @@ def dump_to_oracle_insert_statements(fp, engine, table, raw_rows, columns):
     # No Bulk Insert available in Oracle
     ##################################
     # TODO: Investigate "sqlldr" CLI utility to handle this load...
-    lines = []
-    lines.append("INSERT INTO {0} (".format(table) +
-                 ",".join(columns) +
-                 ")\n")
+    lines = [("INSERT INTO {0} (".format(table) +
+                 ",".join(columns) + ")\n")]
     num_rows = len(raw_rows)
     dialect = engine.dialect
-    for i in range(0, num_rows):
+    for i in range(num_rows):
         if i == num_rows-1:
             # Last row...
             lines.append("SELECT " +
@@ -171,12 +168,12 @@ def dump_to_csv(fp, table_name, columns, raw_rows, dialect):
         separator = "|"
     elif dialect.name.lower() in ["mssql"]:
         separator = "|,"
-        
+
     num_cols = len(raw_rows[0])
     num_rows = len(raw_rows)
     out = StringIO()
-    for i in range(0, num_rows):
-        for j in range(0, num_cols - 1):
+    for i in range(num_rows):
+        for j in range(num_cols - 1):
             out.write(_generate_literal_value_for_csv(raw_rows[i][j], dialect))
             out.write(separator)
         # Print the last column w/o the separator

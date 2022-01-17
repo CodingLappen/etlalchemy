@@ -11,9 +11,7 @@ col_sample_data = [
         ]
 def setup_column_transform_file(tmpdir, data=[]):
     f = tmpdir.join("sample_column_mappings.csv")
-    file_data = []
-    for row in data:
-        file_data.append(','.join(row))
+    file_data = [','.join(row) for row in data]
     file_data_str = '\n'.join(file_data)
     f.write(file_data_str)
     # f.write_text?
@@ -29,9 +27,7 @@ tbl_sample_data = [
         ]
 def setup_table_transform_file(tmpdir, data=[]):
     f = tmpdir.join("sample_table_mappings.csv")
-    file_data = []
-    for row in data:
-        file_data.append(','.join(row))
+    file_data = [','.join(row) for row in data]
     file_data_str = '\n'.join(file_data)
     f.write(file_data_str)
     # f.write_text?
@@ -47,7 +43,7 @@ def get_unique_tables(data):
             tbl_idx = idx
             break
     assert tbl_idx is not None
-    return set([c[tbl_idx] for c in [row for row in data[1:]]])
+    return {c[tbl_idx] for c in list(data[1:])}
 
 def mock_dictreader(headers, data):
     """Simulate the behavior of csv dictreader so we don't need files"""
@@ -84,7 +80,7 @@ def test_column_transformation_delete():
         'unknown': False,
     }
     row = mock_dictreader(col_hdrs, ['middle_name','employees','','','True'])
-    for k in test_cases:
+    for k, v in test_cases.items():
         row['Delete'] = k
         c = SchemaTransformer.ColumnTransformation(row)
         assert c
@@ -92,7 +88,7 @@ def test_column_transformation_delete():
         assert c.old_table == 'employees'
         assert c.new_column == ''
         assert c.new_type == ''
-        assert c.delete == test_cases[k]
+        assert c.delete == v
 
 def test_column_transformation_rename():
     row = mock_dictreader(col_hdrs, ['birth_date','employees','dob','',''])
@@ -155,13 +151,13 @@ def test_table_transformation_delete():
         'unknown': False,
     }
     row = mock_dictreader(tbl_hdrs, ['table_to_delete','new_name','True'])
-    for k in test_cases:
+    for k, v in test_cases.items():
         row['Delete'] = k
         t = SchemaTransformer.TableTransformation(row)
         assert t
         assert t.old_table == 'table_to_delete'
         assert t.new_table == 'new_name' # ! should this be removed?
-        assert t.delete == test_cases[k]
+        assert t.delete == v
 
 def test_needsfiles(tmpdir):
     """Make sure we can create, save and remove temporary files"""
